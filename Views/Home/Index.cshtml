@@ -1,0 +1,106 @@
+﻿@{
+    ViewData["Title"] = "Tourister";
+}
+
+<!-- Bootstrap CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    .hero {
+        background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center;
+        background-size: cover;
+        height: 75vh;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #007bff;
+    }
+
+    .feature-box {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+        .feature-box:hover {
+            transform: translateY(-10px);
+        }
+
+    footer {
+        background-color: #f8f9fa;
+        padding: 20px 0;
+        text-align: center;
+        margin-top: 40px;
+    }
+</style>
+
+<div class="hero text-center">
+    <div>
+        <h1 class="display-3 fw-bold">Explore the World with Tourister</h1>
+        <p class="lead mt-3">Your ultimate tourism management solution</p>
+        <a href="#features" class="btn btn-primary btn-lg mt-4">Discover More</a>
+    </div>
+</div>
+
+<div class="container my-5" id="features">
+    <h2 class="text-center mb-4">Why Choose Tourister?</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-box p-4 text-center shadow-sm">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <h5>Worldwide Destinations</h5>
+                <p>Access an extensive list of beautiful destinations tailored to your preferences.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-box p-4 text-center shadow-sm">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <h5>Easy Booking</h5>
+                <p>Seamless booking experience with real-time availability and instant confirmations.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-box p-4 text-center shadow-sm">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-headset"></i>
+                </div>
+                <h5>24/7 Support</h5>
+                <p>Our expert team is ready to assist you anytime, anywhere.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Gallery</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Beach">
+        </div>
+        <div class="col-md-4">
+            <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Mountain">
+        </div>
+        <div class="col-md-4">
+            <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Cityscape">
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Tourister. All rights reserved.</p>
+</footer>
+
+<!-- Bootstrap JS Bundle with Popper (for responsive and interactive components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />

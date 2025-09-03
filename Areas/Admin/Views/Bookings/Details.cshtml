@@ -1,0 +1,45 @@
+﻿@model TourismManagement.Models.Booking
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Booking Details";
+}
+
+<h2>Booking Details</h2>
+
+<div class="card shadow-sm p-4 mb-4">
+    <dl class="row">
+        <dt class="col-sm-3">Booking ID</dt>
+        <dd class="col-sm-9">@Model.Id</dd>
+
+        <dt class="col-sm-3">Package</dt>
+        <dd class="col-sm-9">@Model.Package?.Title</dd>
+
+        <dt class="col-sm-3">User ID</dt>
+        <dd class="col-sm-9">@Model.UserId</dd>
+
+        <dt class="col-sm-3">Booking Date</dt>
+        <dd class="col-sm-9">@Model.BookingDate.ToString("MMM dd, yyyy")</dd>
+
+        <dt class="col-sm-3">Tour Date</dt>
+        <dd class="col-sm-9">@Model.TourDate.ToString("MMM dd, yyyy")</dd>
+
+        <dt class="col-sm-3">Number of People</dt>
+        <dd class="col-sm-9">@Model.NumberOfPeople</dd>
+
+        <dt class="col-sm-3">Total Price</dt>
+        <dd class="col-sm-9">@Model.TotalPrice.ToString("C")</dd>
+
+        <dt class="col-sm-3">Payment Status</dt>
+        <dd class="col-sm-9">
+            <span class="badge badge-info">@Model.PaymentStatus</span>
+        </dd>
+
+        <dt class="col-sm-3">Booking Status</dt>
+        <dd class="col-sm-9">
+            <span class="badge badge-info">@Model.BookingStatus</span>
+        </dd>
+    </dl>
+</div>
+
+<a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="btn btn-secondary">Back to List</a>

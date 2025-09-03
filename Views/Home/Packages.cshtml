@@ -1,0 +1,47 @@
+﻿@model IEnumerable<TourismManagement.Models.Package>
+
+@{
+    ViewData["Title"] = "Packages";
+}
+
+<h2>Packages</h2>
+
+<p>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="CreatePackage" class="btn btn-primary">Create New Package</a>
+    }
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Destination</th>
+            <th>Duration (Days)</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var package in Model)
+        {
+            <tr>
+                <td>@package.Title</td>
+                <td>@package.Destination</td>
+                <td>@package.DurationDays</td>
+                <td>@package.Price.ToString("C")</td>
+                <td>@package.Status</td>
+                <td>
+                    <a asp-action="PackageDetails" asp-route-id="@package.Id" class="btn btn-info btn-sm">Details</a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="EditPackage" asp-route-id="@package.Id" class="btn btn-warning btn-sm">Edit</a>
+                        <a asp-action="DeletePackage" asp-route-id="@package.Id" class="btn btn-danger btn-sm">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

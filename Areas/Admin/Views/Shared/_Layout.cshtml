@@ -1,0 +1,176 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        nav.navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            z-index: 1030;
+            background-color: #343a40; /* Bootstrap dark */
+            box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+        }
+
+            nav.navbar .navbar-brand {
+                color: #fff;
+                font-weight: 600;
+                font-size: 1.25rem;
+                padding-left: 1rem;
+            }
+
+                nav.navbar .navbar-brand:hover {
+                    color: #adb5bd;
+                    text-decoration: none;
+                }
+
+        .sidebar {
+            position: fixed;
+            top: 56px; /* below navbar */
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            background: linear-gradient(180deg, #007bff 0%, #0056b3 100%);
+            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 8px rgb(0 0 0 / 0.1);
+            transition: width 0.3s ease;
+            overflow-y: auto;
+            z-index: 1020;
+        }
+
+            .sidebar a {
+                display: flex;
+                align-items: center;
+                color: #e9ecef;
+                padding: 12px 20px;
+                font-weight: 500;
+                font-size: 1rem;
+                text-decoration: none;
+                border-left: 4px solid transparent;
+                transition: background-color 0.2s, border-color 0.2s;
+            }
+
+                .sidebar a i {
+                    margin-right: 12px;
+                    font-size: 1.2rem;
+                    width: 20px;
+                    text-align: center;
+                }
+
+                .sidebar a:hover,
+                .sidebar a.active {
+                    background-color: #0056b3;
+                    border-left-color: #ffc107; /* Bootstrap warning amber */
+                    color: #ffc107;
+                    text-decoration: none;
+                }
+
+        .content {
+            margin-left: 220px;
+            padding: 2rem 3rem;
+            flex-grow: 1;
+            min-height: 100vh;
+            margin-top: 56px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgb(0 0 0 / 0.05);
+        }
+
+            .content h2 {
+                font-weight: 700;
+                color: #343a40;
+                margin-bottom: 1rem;
+            }
+
+        hr {
+            border-color: #dee2e6;
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive: collapse sidebar on smaller screens */
+        @@media (max-width: 768px) {
+            .sidebar
+
+        {
+            width: 60px;
+            padding-top: 1rem;
+        }
+
+        .sidebar a {
+            justify-content: center;
+            padding: 12px 0;
+        }
+
+            .sidebar a i {
+                margin-right: 0;
+            }
+
+            .sidebar a span {
+                display: none;
+            }
+
+        .content {
+            margin-left: 60px;
+            padding: 2rem 1.5rem;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <a class="navbar-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <i class="fa-solid fa-cogs me-2"></i>Admin Panel
+        </a>
+    </nav>
+
+    <div class="sidebar">
+        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="Packages" asp-action="Index" class="nav-link">
+            <i class="fas fa-box-open"></i>
+            <span>Packages</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="nav-link">
+            <i class="fas fa-book"></i>
+            <span>Bookings</span>
+        </a>
+    </div>
+
+
+    <main class="content">
+        <h2>@ViewData["Title"]</h2>
+        <hr />
+        @RenderBody()
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

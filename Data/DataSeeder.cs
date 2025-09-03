@@ -1,0 +1,66 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
+
+namespace TourismManagement.Data
+{
+    public static class DataSeeder
+    {
+        public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            string[] roles = { "Admin", "Customer" };
+
+            // Create roles if they don't exist
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+                    if (!roleResult.Succeeded)
+                    {
+                        throw new Exception($"Failed to create role: {role}");
+                    }
+                }
+            }
+
+            // Seed default Admin user
+            var adminEmail = "atchyuthaj@abc.abc";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    NormalizedUserName = adminEmail.ToUpper(),
+                    NormalizedEmail = adminEmail.ToUpper(),
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    Name = "Admin User",
+                    Nationality = "CountryName",
+                    PassportNumber = "A1234567", // Optional
+                };
+
+                var createUserResult = await userManager.CreateAsync(user, "Atchyuth@j110");
+
+                if (createUserResult.Succeeded)
+                {
+                    var addToRoleResult = await userManager.AddToRoleAsync(user, "Admin");
+                    if (!addToRoleResult.Succeeded)
+                    {
+                        throw new Exception($"Failed to add admin user to role.");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Failed to create admin user.");
+                }
+            }
+        }
+    }
+}

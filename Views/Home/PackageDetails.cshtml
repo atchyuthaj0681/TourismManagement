@@ -1,0 +1,38 @@
+﻿@model TourismManagement.Models.Package
+
+@{
+    ViewData["Title"] = "Package Details";
+}
+
+<h2>@Model.Title</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Destination</dt>
+        <dd class="col-sm-10">@Model.Destination</dd>
+
+        <dt class="col-sm-2">Duration (Days)</dt>
+        <dd class="col-sm-10">@Model.DurationDays</dd>
+
+        <dt class="col-sm-2">Price</dt>
+        <dd class="col-sm-10">@Model.Price.ToString("C")</dd>
+
+        <dt class="col-sm-2">Description</dt>
+        <dd class="col-sm-10">@Model.Description</dd>
+
+        <dt class="col-sm-2">Itinerary</dt>
+        <dd class="col-sm-10">@Model.Itinerary</dd>
+
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@Model.Status</dd>
+    </dl>
+</div>
+
+<p>
+    <a asp-action="Packages" class="btn btn-secondary">Back to List</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="EditPackage" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="DeletePackage" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+    }
+</p>
