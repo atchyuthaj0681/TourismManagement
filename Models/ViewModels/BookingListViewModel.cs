@@ -1,11 +1,20 @@
-﻿namespace TourismManagement.Models.ViewModels
+﻿using System.Collections.Generic;
+using TourismManagement.Models;
+
+namespace TourismManagement.Models.ViewModels
 {
     public class BookingListViewModel
     {
-        public IEnumerable<Booking> Bookings { get; set; }
-        public string SearchString { get; set; }
-        public string PaymentFilter { get; set; }
-        public string BookingFilter { get; set; }
-        public PaginationModel Pagination { get; set; }
+        public List<Booking> Bookings { get; set; } = new();
+
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+
+        public string? UserEmail { get; set; }
+        public string? Status { get; set; }
+        public int? PackageId { get; set; }
+        public string SortOrder { get; set; } = "";
+
+        public List<Package>? Packages { get; set; } = new();
     }
 }

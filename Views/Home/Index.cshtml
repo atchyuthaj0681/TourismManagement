@@ -1,106 +1,120 @@
-﻿@{
-    ViewData["Title"] = "Tourister";
+﻿@model TourismManagement.Models.ViewModels.PackageListViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Home";
 }
 
-<!-- Bootstrap CSS CDN -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <style>
-    .hero {
-        background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center;
-        background-size: cover;
-        height: 75vh;
-        color: white;
+    /* Hero Carousel */
+    .carousel-item img {
+        height: 550px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    /* Scrollable Packages */
+    .scroll-container {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+        overflow-x: auto;
+        gap: 20px;
+        padding: 10px 5px 30px;
+        scroll-snap-type: x mandatory;
     }
 
-    .feature-icon {
-        font-size: 3rem;
-        color: #007bff;
-    }
-
-    .feature-box {
-        transition: transform 0.3s ease;
-        cursor: pointer;
-    }
-
-        .feature-box:hover {
-            transform: translateY(-10px);
+        .scroll-container::-webkit-scrollbar {
+            height: 8px;
         }
 
-    footer {
-        background-color: #f8f9fa;
-        padding: 20px 0;
-        text-align: center;
-        margin-top: 40px;
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+    .package-card {
+        flex: 0 0 auto;
+        width: 300px;
+        scroll-snap-align: start;
+    }
+
+    .card-img-top {
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .card:hover {
+        transform: scale(1.03);
+        transition: 0.3s ease;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 </style>
 
-<div class="hero text-center">
-    <div>
-        <h1 class="display-3 fw-bold">Explore the World with Tourister</h1>
-        <p class="lead mt-3">Your ultimate tourism management solution</p>
-        <a href="#features" class="btn btn-primary btn-lg mt-4">Discover More</a>
+<!-- ✅ HERO CAROUSEL SECTION -->
+<div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="2000" data-bs-wrap="true">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="/images/flight.jpg" class="d-block w-100" alt="Flight Image">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/mountain.jpg" class="d-block w-100" alt="Mountain Image">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/beach.jpg" class="d-block w-100" alt="Beach Image">
+        </div>
+        <!-- 🔁 Add more images here -->
     </div>
+
+    <!-- 🔄 Manual Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
 </div>
 
-<div class="container my-5" id="features">
-    <h2 class="text-center mb-4">Why Choose Tourister?</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card feature-box p-4 text-center shadow-sm">
-                <div class="feature-icon mb-3">
-                    <i class="bi bi-geo-alt-fill"></i>
+<!-- ✅ SCROLLABLE PACKAGE LIST -->
+<div class="container">
+    <h2 class="mb-4">Explore Active Packages</h2>
+
+    @if (!Model.Packages.Any(p => p.Status == "Active"))
+    {
+        <p>No active packages available at the moment.</p>
+    }
+    else
+    {
+        <div class="scroll-container">
+            @foreach (var package in Model.Packages.Where(p => p.Status == "Active"))
+            {
+                <div class="card package-card shadow-sm">
+                    <img src="@package.ImagePath" class="card-img-top" alt="@package.Title" />
+                    <div class="card-body">
+                        <h5 class="card-title">@package.Title</h5>
+                        <p class="card-text mb-3">
+                            <strong>Destination:</strong> @package.Destination<br />
+                            <strong>Duration:</strong> @package.DurationDays days<br />
+                            <strong>Price:</strong> ₹@package.Price.ToString("N0")
+                        </p>
+
+                        <div class="btn-group mt-auto">
+                            <a href="/Home/PackageDetails/@package.Id" class="btn btn-outline-primary btn-sm w-50">View Details</a>
+                            <a href="/Booking/BookNow?packageId=@package.Id" class="btn btn-success btn-sm w-50">Book Now</a>
+                        </div>
+                    </div>
                 </div>
-                <h5>Worldwide Destinations</h5>
-                <p>Access an extensive list of beautiful destinations tailored to your preferences.</p>
-            </div>
+            }
         </div>
-        <div class="col-md-4">
-            <div class="card feature-box p-4 text-center shadow-sm">
-                <div class="feature-icon mb-3">
-                    <i class="bi bi-calendar-check-fill"></i>
-                </div>
-                <h5>Easy Booking</h5>
-                <p>Seamless booking experience with real-time availability and instant confirmations.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card feature-box p-4 text-center shadow-sm">
-                <div class="feature-icon mb-3">
-                    <i class="bi bi-headset"></i>
-                </div>
-                <h5>24/7 Support</h5>
-                <p>Our expert team is ready to assist you anytime, anywhere.</p>
-            </div>
-        </div>
-    </div>
+    }
 </div>
-
-<div class="container my-5">
-    <h2 class="text-center mb-4">Gallery</h2>
-    <div class="row g-3">
-        <div class="col-md-4">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Beach">
-        </div>
-        <div class="col-md-4">
-            <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Mountain">
-        </div>
-        <div class="col-md-4">
-            <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=600&q=80" class="img-fluid rounded shadow" alt="Cityscape">
-        </div>
-    </div>
-</div>
-
-<footer>
-    <p>&copy; 2025 Tourister. All rights reserved.</p>
-</footer>
-
-<!-- Bootstrap JS Bundle with Popper (for responsive and interactive components) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />

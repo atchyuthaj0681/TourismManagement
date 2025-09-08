@@ -67,19 +67,42 @@ namespace TourismManagement.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Packages/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Package package)
+        public async Task<IActionResult> Create(Package package, IFormFile ImageFile)
         {
             if (ModelState.IsValid)
             {
+                // Handle image upload
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    // Create upload directory if it doesn't exist
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    // Generate unique file name
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save image to disk
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+
+                    // Save image path to the model (relative to wwwroot)
+                    package.ImagePath = "/uploads/" + uniqueFileName;
+                }
+
                 _context.Add(package);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(package);
         }
+
 
         // GET: Packages/Edit/5
         public async Task<IActionResult> Edit(int? id)

@@ -1,0 +1,44 @@
+﻿@model TourismManagement.Models.ViewModels.EditBookingViewModel
+
+@{
+    ViewData["Title"] = "Edit Booking";
+}
+
+<h2>Edit Booking</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="EditBooking" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="TravelDate" class="form-label"></label>
+        <input asp-for="TravelDate" class="form-control" type="date" />
+        <span asp-validation-for="TravelDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="NumPeople" class="form-label"></label>
+        <input asp-for="NumPeople" class="form-control" type="number" min="1" />
+        <span asp-validation-for="NumPeople" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Total Amount</label>
+        <input class="form-control" value="@Model.TotalAmount.ToString("C")" readonly />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Booking</button>
+    <a asp-action="BookingHistory" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+@{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+}

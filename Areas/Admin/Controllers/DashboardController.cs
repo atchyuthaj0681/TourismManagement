@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using TourismManagement.Models.ViewModels;
 namespace TourismManagement.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,19 +26,23 @@ namespace TourismManagement.Areas.Admin.Controllers
             var totalBookings = await _context.Bookings.CountAsync();
 
             var totalDestinations = await _context.Packages
+                                        .Where(p => !string.IsNullOrEmpty(p.Destination))
                                         .Select(p => p.Destination)
                                         .Distinct()
                                         .CountAsync();
 
-            var totalPeople = await _context.Bookings.SumAsync(b => (int?)b.NumberOfPeople) ?? 0;
+            var totalPeople = await _context.Bookings
+                                    .Where(b => b.Status != "Cancelled") // optional filter
+                                    .SumAsync(b => (int?)b.NumPeople) ?? 0;
 
             // Booking counts grouped by destination
             var bookingCountByDestination = await _context.Bookings
                 .Include(b => b.Package)
-                .GroupBy(b => b.Package.Destination)
+                .Where(b => b.Package != null)
+                .GroupBy(b => b.Package.Destination ?? "Unknown")
                 .Select(g => new
                 {
-                    Destination = g.Key ?? "Unknown",
+                    Destination = g.Key,
                     Count = g.Count()
                 })
                 .ToDictionaryAsync(x => x.Destination, x => x.Count);

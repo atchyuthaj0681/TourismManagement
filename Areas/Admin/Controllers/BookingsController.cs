@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+using System.Globalization;
+using System.Text;
 using TourismManagement.Data;
 using TourismManagement.Models;
 using TourismManagement.Models.ViewModels;
@@ -13,6 +14,7 @@ namespace TourismManagement.Areas.Admin.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private const int PageSize = 10;
 
         public BookingsController(ApplicationDbContext context)
         {
@@ -20,136 +22,111 @@ namespace TourismManagement.Areas.Admin.Controllers
         }
 
         // GET: Admin/Bookings
-        public async Task<IActionResult> Index(string searchString, string paymentFilter, string bookingFilter, int pageNumber = 1)
+        public async Task<IActionResult> Index(string status, string userEmail, int? packageId, int page = 1, string sortOrder = "desc")
         {
-            int pageSize = 10;
+            var bookingsQuery = _context.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Package)
+                .AsQueryable();
 
-            var bookings = _context.Bookings.Include(b => b.Package).AsQueryable();
+            // Filtering
+            if (!string.IsNullOrWhiteSpace(status))
+                bookingsQuery = bookingsQuery.Where(b => b.Status == status);
 
-            // Search
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrWhiteSpace(userEmail))
+                bookingsQuery = bookingsQuery.Where(b => b.User.Email.Contains(userEmail));
+
+            if (packageId.HasValue && packageId > 0)
+                bookingsQuery = bookingsQuery.Where(b => b.PackageId == packageId.Value);
+
+            // Sorting
+            bookingsQuery = sortOrder.ToLower() switch
             {
-                bookings = bookings.Where(b => b.Package.Title.Contains(searchString) || b.UserId.ToString().Contains(searchString));
-            }
-
-            // Filter Payment Status
-            if (!string.IsNullOrEmpty(paymentFilter))
-            {
-                bookings = bookings.Where(b => b.PaymentStatus == paymentFilter);
-            }
-
-            // Filter Booking Status
-            if (!string.IsNullOrEmpty(bookingFilter))
-            {
-                bookings = bookings.Where(b => b.BookingStatus == bookingFilter);
-            }
-
-            // Count total for pagination
-            var count = await bookings.CountAsync();
-
-            // Fetch page data
-            var items = await bookings
-                .OrderByDescending(b => b.BookingDate)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            // Pass data and paging info to view
-            var model = new BookingListViewModel
-            {
-                Bookings = items,
-                SearchString = searchString,
-                PaymentFilter = paymentFilter,
-                BookingFilter = bookingFilter,
-                Pagination = new PaginationModel
-                {
-                    CurrentPage = pageNumber,
-                    PageSize = pageSize,
-                    TotalItems = count
-                }
+                "asc" => bookingsQuery.OrderBy(b => b.BookingDate),
+                "amount_asc" => bookingsQuery.OrderBy(b => b.TotalAmount),
+                "amount_desc" => bookingsQuery.OrderByDescending(b => b.TotalAmount),
+                _ => bookingsQuery.OrderByDescending(b => b.BookingDate), // default desc
             };
 
-            return View(model);
-        }
+            // Pagination
+            var totalItems = await bookingsQuery.CountAsync();
+            var bookings = await bookingsQuery
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
 
-
-        // GET: Admin/Bookings/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var booking = await _context.Bookings
-                .Include(b => b.Package)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (booking == null) return NotFound();
-
-            return View(booking);
-        }
-
-        // GET: Admin/Bookings/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null) return NotFound();
-
-            return View(booking);
-        }
-
-        // POST: Admin/Bookings/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Booking booking)
-        {
-            if (id != booking.Id) return NotFound();
-
-            if (ModelState.IsValid)
+            var viewModel = new BookingListViewModel
             {
-                try
-                {
-                    _context.Update(booking);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookingExists(booking.Id)) return NotFound();
-                    else throw;
-                }
+                Bookings = bookings,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize),
+                Status = status,
+                UserEmail = userEmail,
+                PackageId = packageId,
+                SortOrder = sortOrder,
+                Packages = await _context.Packages.ToListAsync()
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Admin/Bookings/CancelBooking/5
+        [HttpPost]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null || booking.Status == "Cancelled")
+            {
+                TempData["Error"] = "Booking not found or already cancelled.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(booking);
-        }
 
-        // GET: Admin/Bookings/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
+            if (booking.TravelDate <= DateTime.Now)
+            {
+                TempData["Error"] = "Cannot cancel past or ongoing bookings.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var booking = await _context.Bookings
-                .Include(b => b.Package)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            booking.Status = "Cancelled";
+            booking.CancellationDate = DateTime.Now;
+            booking.RefundAmount = booking.TotalAmount - (booking.TotalAmount * 0.15m); // 15% penalty
 
-            if (booking == null) return NotFound();
-
-            return View(booking);
-        }
-
-        // POST: Admin/Bookings/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var booking = await _context.Bookings.FindAsync(id);
-            _context.Bookings.Remove(booking);
+            _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Booking cancelled successfully.";
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BookingExists(int id)
+        // GET: Admin/Bookings/ExportCsv
+        public async Task<IActionResult> ExportCsv(string status, string userEmail, int? packageId)
         {
-            return _context.Bookings.Any(e => e.Id == id);
+            var bookingsQuery = _context.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Package)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(status))
+                bookingsQuery = bookingsQuery.Where(b => b.Status == status);
+
+            if (!string.IsNullOrWhiteSpace(userEmail))
+                bookingsQuery = bookingsQuery.Where(b => b.User.Email.Contains(userEmail));
+
+            if (packageId.HasValue && packageId > 0)
+                bookingsQuery = bookingsQuery.Where(b => b.PackageId == packageId.Value);
+
+            var bookings = await bookingsQuery.ToListAsync();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("UserEmail,PackageTitle,TravelDate,NumPeople,TotalAmount,Status,CancellationDate,RefundAmount");
+
+            foreach (var b in bookings)
+            {
+                csv.AppendLine($"\"{b.User.Email}\",\"{b.Package.Title}\",\"{b.TravelDate:yyyy-MM-dd}\",\"{b.NumPeople}\",\"{b.TotalAmount.ToString("F2", CultureInfo.InvariantCulture)}\",\"{b.Status}\",\"{(b.CancellationDate.HasValue ? b.CancellationDate.Value.ToString("yyyy-MM-dd") : "")}\",\"{(b.RefundAmount.HasValue ? b.RefundAmount.Value.ToString("F2", CultureInfo.InvariantCulture) : "")}\"");
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", "BookingsReport.csv");
         }
     }
 }

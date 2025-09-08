@@ -1,34 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿using TourismManagement.Models;
 namespace TourismManagement.Models
 {
-
     public class Booking
     {
         public int Id { get; set; }
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
 
-        [Required]
         public int PackageId { get; set; }
         public Package Package { get; set; }
 
-        [Required]
-        public string UserId { get; set; }
-        public ApplicationUser User { get; set; }   // Navigation property
-
-        [Required]
         public DateTime BookingDate { get; set; }
+        public DateTime TravelDate { get; set; }
+        public int NumPeople { get; set; }
+        public decimal TotalAmount { get; set; }
 
-        [Required]
-        public DateTime TourDate { get; set; }
-
-        [Required]
-        public int NumberOfPeople { get; set; }
-
-        [Required]
-        public decimal TotalPrice { get; set; }
-
-        public string PaymentStatus { get; set; } // e.g., Paid, Pending, Refunded
-
-        public string BookingStatus { get; set; } // e.g., Confirmed, Cancelled, Completed
+        public string Status { get; set; } = "Booked"; // or Cancelled
+        public DateTime? CancellationDate { get; set; }
+        public decimal? RefundAmount { get; set; }
     }
 }

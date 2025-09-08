@@ -12,22 +12,19 @@ namespace TourismManagement.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
+            // 1. Ensure roles exist
             string[] roles = { "Admin", "Customer" };
-
-            // Create roles if they don't exist
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
                     var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
                     if (!roleResult.Succeeded)
-                    {
                         throw new Exception($"Failed to create role: {role}");
-                    }
                 }
             }
 
-            // Seed default Admin user
+            // 2. Seed default Admin user
             var adminEmail = "atchyuthaj@abc.abc";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
@@ -43,18 +40,17 @@ namespace TourismManagement.Data
                     SecurityStamp = Guid.NewGuid().ToString(),
                     Name = "Admin User",
                     Nationality = "CountryName",
-                    PassportNumber = "A1234567", // Optional
+                    PassportNumber = "A1234567"
                 };
 
                 var createUserResult = await userManager.CreateAsync(user, "Atchyuth@j110");
 
                 if (createUserResult.Succeeded)
                 {
+                    // Assign ONLY Admin role to this user
                     var addToRoleResult = await userManager.AddToRoleAsync(user, "Admin");
                     if (!addToRoleResult.Succeeded)
-                    {
                         throw new Exception($"Failed to add admin user to role.");
-                    }
                 }
                 else
                 {

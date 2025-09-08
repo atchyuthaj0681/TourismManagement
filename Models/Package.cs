@@ -32,6 +32,9 @@ namespace TourismManagement.Models
         [Required]
         [StringLength(10)]
         public string Status { get; set; } // "Active" or "Inactive"
+        [Display(Name = "Package Image")]
+        public string? ImagePath { get; set; } // Store image URL or path
+
 
         // Navigation property
         public List<Booking> Bookings { get; set; } = new List<Booking>();

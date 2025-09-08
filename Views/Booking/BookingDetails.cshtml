@@ -1,0 +1,45 @@
+﻿@model TourismManagement.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<h2>Booking Details</h2>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-4">Package</dt>
+            <dd class="col-sm-8">@Model.Package.Title</dd>
+
+            <dt class="col-sm-4">User</dt>
+            <dd class="col-sm-8">@Model.User.Email</dd>
+
+            <dt class="col-sm-4">Travel Date</dt>
+            <dd class="col-sm-8">@Model.TravelDate.ToString("yyyy-MM-dd")</dd>
+
+            <dt class="col-sm-4">Booking Date</dt>
+            <dd class="col-sm-8">@Model.BookingDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+            <dt class="col-sm-4">People</dt>
+            <dd class="col-sm-8">@Model.NumPeople</dd>
+
+            <dt class="col-sm-4">Total Amount</dt>
+            <dd class="col-sm-8">@Model.TotalAmount.ToString("C")</dd>
+
+            <dt class="col-sm-4">Status</dt>
+            <dd class="col-sm-8">@Model.Status</dd>
+
+            @if (Model.Status == "Cancelled")
+            {
+                <dt class="col-sm-4">Cancellation Date</dt>
+                <dd class="col-sm-8">@Model.CancellationDate?.ToString("yyyy-MM-dd")</dd>
+
+                <dt class="col-sm-4">Refund</dt>
+                <dd class="col-sm-8">@Model.RefundAmount?.ToString("C")</dd>
+            }
+        </dl>
+    </div>
+</div>
+
+<a asp-action="BookingHistory" class="btn btn-secondary mt-3">Back</a>

@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = null;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <!DOCTYPE html>
@@ -17,7 +17,8 @@
             display: flex;
             overflow-x: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            color: #212529; /* Bootstrap body text color */
         }
 
         nav.navbar {
@@ -27,19 +28,23 @@
             right: 0;
             height: 56px;
             z-index: 1030;
-            background-color: #343a40; /* Bootstrap dark */
-            box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+            background-color: #ffffff; /* White navbar */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #dee2e6;
         }
 
             nav.navbar .navbar-brand {
-                color: #fff;
-                font-weight: 600;
-                font-size: 1.25rem;
-                padding-left: 1rem;
+                color: #0d6efd; /* Bootstrap primary */
+                font-weight: 700;
+                font-size: 1.3rem;
+                padding-left: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             }
 
                 nav.navbar .navbar-brand:hover {
-                    color: #adb5bd;
+                    color: #0a58ca;
                     text-decoration: none;
                 }
 
@@ -48,64 +53,74 @@
             top: 56px; /* below navbar */
             bottom: 0;
             left: 0;
-            width: 220px;
-            background: linear-gradient(180deg, #007bff 0%, #0056b3 100%);
-            padding-top: 1rem;
+            width: 240px;
+            background-color: #ffffff;
+            padding-top: 1.5rem;
             display: flex;
             flex-direction: column;
-            box-shadow: 2px 0 8px rgb(0 0 0 / 0.1);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
             transition: width 0.3s ease;
             overflow-y: auto;
             z-index: 1020;
+            border-right: 1px solid #dee2e6;
         }
 
             .sidebar a {
                 display: flex;
                 align-items: center;
-                color: #e9ecef;
-                padding: 12px 20px;
-                font-weight: 500;
+                color: #495057; /* Bootstrap secondary text */
+                padding: 14px 24px;
+                font-weight: 600;
                 font-size: 1rem;
                 text-decoration: none;
                 border-left: 4px solid transparent;
-                transition: background-color 0.2s, border-color 0.2s;
+                transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+                white-space: nowrap;
             }
 
                 .sidebar a i {
-                    margin-right: 12px;
+                    margin-right: 16px;
                     font-size: 1.2rem;
-                    width: 20px;
+                    width: 24px;
                     text-align: center;
+                    color: #6c757d; /* Bootstrap gray */
+                    transition: color 0.2s ease;
                 }
 
                 .sidebar a:hover,
                 .sidebar a.active {
-                    background-color: #0056b3;
-                    border-left-color: #ffc107; /* Bootstrap warning amber */
-                    color: #ffc107;
-                    text-decoration: none;
+                    background-color: #e7f1ff; /* Light primary blue background */
+                    border-left-color: #0d6efd; /* Bootstrap primary */
+                    color: #0d6efd;
                 }
 
+                    .sidebar a:hover i,
+                    .sidebar a.active i {
+                        color: #0d6efd;
+                    }
+
         .content {
-            margin-left: 220px;
-            padding: 2rem 3rem;
+            margin-left: 240px;
+            padding: 2.5rem 3rem;
             flex-grow: 1;
             min-height: 100vh;
             margin-top: 56px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgb(0 0 0 / 0.05);
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.1); /* subtle primary color shadow */
+            transition: margin-left 0.3s ease;
         }
 
             .content h2 {
                 font-weight: 700;
-                color: #343a40;
-                margin-bottom: 1rem;
+                color: #212529;
+                margin-bottom: 1.5rem;
+                font-size: 2rem;
             }
 
         hr {
             border-color: #dee2e6;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         /* Responsive: collapse sidebar on smaller screens */
@@ -113,7 +128,7 @@
             .sidebar
 
         {
-            width: 60px;
+            width: 70px;
             padding-top: 1rem;
         }
 
@@ -131,7 +146,7 @@
             }
 
         .content {
-            margin-left: 60px;
+            margin-left: 70px;
             padding: 2rem 1.5rem;
         }
 
@@ -139,29 +154,28 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark">
+    <nav class="navbar navbar-light">
         <a class="navbar-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-            <i class="fa-solid fa-cogs me-2"></i>Admin Panel
+            <i class="fa-solid fa-cogs"></i> Admin Panel
         </a>
     </nav>
 
     <div class="sidebar">
-        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link">
+        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Dashboard" ? "active" : "")" aria-current="page">
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
 
-        <a asp-area="Admin" asp-controller="Packages" asp-action="Index" class="nav-link">
+        <a asp-area="Admin" asp-controller="Packages" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Packages" ? "active" : "")">
             <i class="fas fa-box-open"></i>
             <span>Packages</span>
         </a>
 
-        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="nav-link">
+        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Bookings" ? "active" : "")">
             <i class="fas fa-book"></i>
             <span>Bookings</span>
         </a>
     </div>
-
 
     <main class="content">
         <h2>@ViewData["Title"]</h2>
@@ -170,7 +184,6 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     @RenderSection("Scripts", required: false)
 </body>
 </html>

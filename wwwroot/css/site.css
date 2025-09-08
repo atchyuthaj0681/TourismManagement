@@ -1,35 +1,451 @@
+/* =========================
+   Site Theme – Modern UI
+   Works great with Bootstrap 5
+   ========================= */
+
+/* ---------- Design tokens ---------- */
+:root {
+    --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    --radius-sm: .5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --primary: #2563eb; /* indigo-600 */
+    --primary-700: #1d4ed8;
+    --secondary: #6366f1; /* indigo-500 */
+    --accent: #f43f5e; /* rose-500 */
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --muted: #6b7280;
+    --bg: #0b1020; /* deep slate */
+    --surface: #0f1428; /* cards / sections */
+    --surface-2: #151b34; /* elevated */
+    --text: #e5e7eb;
+    --text-dim: #cbd5e1;
+    --shadow-soft: 0 8px 24px rgba(0,0,0,.15);
+    --shadow-strong: 0 18px 50px rgba(0,0,0,.35);
+}
+
+/* ---------- Base / layout ---------- */
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-.dropdown-menu {
-    left: auto !important;
-    right: 0;
-    margin-left: -50px; /* Adjust this value as needed */
+    font-size: clamp(14px, 0.5vw + 12px, 16px);
+    position: relative;
+    min-height: 100%;
 }
 
 html, body {
-    overflow-x: hidden; /* prevent horizontal scroll */
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-y: auto;
+    overflow-x: hidden; /* prevent horizontal scroll */
+}
+
+body {
+    background: radial-gradient(1200px 800px at 80% -10%, #1c2250 0%, transparent 60%), radial-gradient(1200px 800px at -10% 80%, #1b3b6b 0%, transparent 60%), var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    margin-bottom: 60px; /* for sticky footer layouts */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optional: container soft max width feel on large screens */
+.container, .container-fluid {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/* ---------- Typography ---------- */
+h1, h2, h3, h4, h5, h6 {
+    letter-spacing: .2px;
+}
+
+h1 {
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+h2 {
+    font-weight: 800;
+    line-height: 1.15;
+    color: black;
+}
+
+.lead {
+    color: var(--text-dim);
+}
+
+/* Fancy gradient text (use class where desired) */
+.text-gradient {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* ---------- Links & buttons ---------- */
+a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+    a:hover {
+        color: var(--primary-700);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+/* Bootstrap button polish */
+.btn {
+    border-radius: 999px; /* pills */
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+    will-change: transform;
+}
+
+    .btn:focus,
+    .btn:active:focus,
+    .btn-link.nav-link:focus,
+    .form-control:focus,
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.15rem rgba(255,255,255,.35), 0 0 0 0.35rem rgba(37,140,251,.45) !important;
+        outline: none;
+    }
+
+/* Gradient primary */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border: 0;
+    box-shadow: var(--shadow-soft);
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-strong);
+        filter: brightness(1.05);
+    }
+
+/* Outline variant */
+.btn-outline-primary {
+    border: 2px solid rgba(99,102,241,.6);
+    color: #0f1428;
+    background: transparent;
+}
+
+    .btn-outline-primary:hover {
+        background: rgba(99,102,241,.1);
+        border-color: var(--secondary);
+    }
+
+/* Accent CTA */
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, #fb7185 100%);
+    border: 0;
+    color: #fff;
+}
+
+/* ---------- Forms ---------- */
+.form-control {
+    border-radius: 999px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    color: #fff;
+    padding: .8rem 1rem;
+}
+
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+
+    .form-control:focus {
+        background: rgba(255,255,255,.08);
+        border-color: rgba(99,102,241,.5);
+    }
+
+/* ---------- Navbar Base ---------- */
+.navbar {
+    --backdrop: rgba(15, 20, 40, 0.55);
+    background: linear-gradient(180deg, rgba(15, 20, 40, 0.85), rgba(15, 20, 40, 0.55)) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+    .navbar .nav-link {
+        color: var(--text-dim) !important;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        position: relative;
+        z-index: 1;
+        margin-right: 12px; /* spacing between buttons */
+
+        border: 3px solid transparent; /* keep border size consistent */
+        box-shadow: none;
+    }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            color: #332f2e !important; /* your cream color or desired */
+            border-color: #b3b1aa; /* visible border on hover */
+            box-shadow: 0 0 15px 3px rgba(179, 177, 170, 0.4); /* subtle grey shadow */
+            text-decoration: none; /* remove underline */
+        }
+
+        .navbar .nav-link:last-child {
+            margin-right: 0;
+        }
+
+
+/* 1. Ensure dropdown appears over everything */
+.dropdown-menu {
+    position: absolute;
+    z-index: 1060 !important; /* Above Bootstrap sticky/layout surfaces */
+}
+
+/* 2. Make sure your navbar is positioned and prioritized */
+.navbar,
+.navbar .dropdown {
+    position: relative;
+    z-index: 1070; /* Higher than dropdown to ensure stacking */
+}
+
+/* 3. Avoid clipping by ancestor elements */
+.hero,
+.hero * {
+    z-index: 1;
+    position: relative;
+}
+
+/* 4. Override overflow restrictions */
+.hero,
+.container {
+    overflow: visible !important;
+}
+
+/* ---------- Cards / surfaces ---------- */
+.card {
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-strong);
+        border-color: rgba(99,102,241,.35);
+    }
+
+.card-img-top {
+    aspect-ratio: 16/10;
+    object-fit: cover;
+}
+
+.card-title {
+    font-weight: 800;
+}
+
+/* Badges for “Featured”, etc. */
+.badge-soft {
+    background: rgba(99,102,241,.15);
+    color: #c7d2fe;
+    border: 1px solid rgba(99,102,241,.35);
+    border-radius: 999px;
+    padding: .35rem .65rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+/* ---------- Hero section (optional structure) ----------
+   <section class="hero">
+      <div class="hero__bg" style="--img:url('/images/hero-bg.jpg')"></div>
+      <div class="hero__content">...</div>
+   </section>
+------------------------------------------------------ */
+.hero {
+    position: relative;
+    min-height: 82vh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+.hero__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(12,14,30,.6), rgba(12,14,30,.6)), var(--img, url('/images/hero-bg.jpg')) center/cover no-repeat;
+    filter: saturate(1.05);
+}
+
+.hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 64rem;
+    margin: auto;
+}
+
+.hero h1 {
+    font-size: clamp(2.2rem, 4vw, 4.25rem);
+}
+
+.hero .lead {
+    font-size: clamp(1.05rem, 1.2vw, 1.35rem);
+}
+
+/* ---------- Horizontal package scroller ---------- */
+/* Markup tip:
+   <div class="scroll-row">
+     <div class="card package-card">...</div>
+     ...
+   </div>
+   */
+.scroll-row {
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    padding-bottom: .5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .scroll-row > * {
+        scroll-snap-align: center;
+        flex: 0 0 auto;
+        min-width: 320px;
+        max-width: 360px;
+    }
+
+.package-card .price {
+    font-weight: 900;
+    font-size: 1.35rem;
+    color: #86efac;
+    letter-spacing: .2px;
+}
+
+.package-card .meta {
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Left/right nudge buttons */
+.scroll-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: #0f1428;
+    box-shadow: var(--shadow-soft);
+}
+
+    .scroll-btn:hover {
+        background: #151b34;
+        transform: translateY(-1px);
+    }
+
+/* ---------- Newsletter / callout ---------- */
+.callout {
+    background: linear-gradient(135deg, rgba(37,99,235,.18), rgba(244,63,94,.18));
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+    background: #0f1428;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* ---------- Utilities ---------- */
+.glass {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(8px);
+}
+
+.shadow-glow {
+    box-shadow: 0 0 0 2px rgba(99,102,241,.25), 0 18px 50px rgba(37,99,235,.35);
+}
+
+/* ---------- Scrollbar polish ---------- */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148,163,184,.6) transparent;
+}
+
+    *::-webkit-scrollbar {
+        height: 10px;
+        width: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: rgba(148,163,184,.35);
+        border-radius: 20px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(148,163,184,.6);
+        }
+
+/* ---------- Motion & dark-mode safety ---------- */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* If you use a light theme anywhere, this keeps contrast */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f7f8fb;
+        --surface: #ffffff;
+        --surface-2: #f3f4f8;
+        --text: #111827;
+        --text-dim: #475569;
+    }
+
+    body {
+        background: radial-gradient(1200px 800px at 80% -10%, #e6ecff 0%, transparent 60%), radial-gradient(1200px 800px at -10% 80%, #f3e9ff 0%, transparent 60%), var(--bg);
+        color: var(--text);
+    }
+
+    .navbar {
+        background: rgba(255,255,255,.85) !important;
+        border-bottom: 1px solid rgba(17,24,39,.06);
+    }
+
+    .dropdown-menu {
+        background: #fff;
+        border-color: rgba(17,24,39,.08);
+    }
+
+    .card {
+        background: #fff;
+        border-color: rgba(17,24,39,.08);
+    }
+
+    .form-control {
+        background: #fff;
+        color: #111827;
+        border-color: #e5e7eb;
+    }
+}
+
+/* ---------- Keep from your original (cleaned) ---------- */
+/* Maintain right-aligned dropdowns; removed negative margin */
+.dropdown-menu {
+    left: auto !important;
+    right: 0 !important;
 }

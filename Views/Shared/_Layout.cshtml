@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] - Tourism Management</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -10,35 +10,39 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">Tourister</a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                        aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <!-- Left side nav links -->
+                    <!-- Left-side navigation -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Destinations" asp-action="Index">Destinations</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Packages">Packages</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="BookNow">Book Now</a>
-
+                            <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookNow">Book Now</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="BookingHistory">My Bookings</a>
+                            <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookingHistory">My Bookings</a>
                         </li>
-
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+        </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Booking" asp-action="ManageBookings">Manage Bookings</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About Us</a>
                         </li>
@@ -47,9 +51,9 @@
                         </li>
                     </ul>
 
-                    <!-- Right side: search bar + login -->
-                    <form class="d-flex me-3" asp-controller="Search" asp-action="Index" method="get">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                    <!-- Right-side: search + login -->
+                    <form class="d-flex me-3" asp-controller="Search" asp-action="Index" method="get" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query" />
                         <button class="btn btn-outline-primary" type="submit">Search</button>
                     </form>
 
@@ -65,11 +69,14 @@
         </main>
     </div>
 
-    @* <footer class="border-top footer text-muted">
+    @* Optional Footer *@
+    @* 
+    <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2025 - TourismManagement - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer> *@
+    </footer>
+    *@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
