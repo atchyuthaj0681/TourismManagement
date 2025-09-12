@@ -5,95 +5,139 @@
 }
 
 <style>
+    /* Clean background for the page */
+    body {
+        background-color: #f8f9fa; /* Light gray background */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
     .booking-container {
-        min-height: 100vh;
+        min-height: 90vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        background: linear-gradient(to bottom right, #f8faff, #e6ecff);
-        padding: 30px;
+        padding: 2rem;
     }
 
+    /* Modern, Opaque Form Card */
     .booking-card {
         background-color: #ffffff;
-        padding: 30px 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         width: 100%;
-        max-width: 500px;
+        max-width: 550px;
+        overflow: hidden; /* Important for the header's rounded corners */
     }
 
-        .booking-card h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            font-weight: 700;
-            font-size: 24px;
-            color: #333;
+    /* Colored Card Header */
+    .card-header-custom {
+        background-image: linear-gradient(45deg, #5D5FEF 0%, #8B5CE0 100%);
+        padding: 2rem;
+        text-align: center;
+    }
+
+        .card-header-custom h2 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0;
         }
 
+    /* Card Body for the Form */
+    .card-body-custom {
+        padding: 2.5rem;
+    }
+
     .form-group label {
-        font-weight: 500;
-        margin-bottom: 5px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #343a40;
     }
 
+    /* Modern Form Inputs */
     .form-control {
+        background-color: #f1f3f5;
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+        font-size: 1rem;
+        color: #495057;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+        .form-control:focus {
+            border-color: #5D5FEF;
+            box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.25);
+            background-color: #fff;
+            outline: none;
+        }
+
+    /* Vibrant Gradient Button */
     .btn-book {
-        margin-top: 20px;
+        margin-top: 1.5rem;
         width: 100%;
-        padding: 12px;
-        background-color: #4b6eff;
+        padding: 14px;
+        background-image: linear-gradient(45deg, #5D5FEF 0%, #8B5CE0 100%);
         color: white;
-        font-size: 16px;
+        font-size: 1.1rem;
+        font-weight: 600;
         border: none;
         border-radius: 8px;
-        transition: 0.3s;
         cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(93, 95, 239, 0.3);
     }
 
-        .btn-book:hover {
-            background-color: #3754d1;
+        .btn-book:hover, .btn-book:focus {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(93, 95, 239, 0.4);
+            outline: none;
         }
 
     .text-danger {
         font-size: 0.9rem;
+        margin-top: 5px;
+        display: block;
+        font-weight: 500;
     }
 </style>
 
 <div class="booking-container">
     <div class="booking-card">
-        <h2>@ViewData["Title"]</h2>
+        <div class="card-header-custom">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+        <div class="card-body-custom">
+            <form asp-action="BookNow" method="post" novalidate>
+                <div class="form-group mb-3">
+                    <label asp-for="PackageId">Package</label>
+                    <select asp-for="PackageId" class="form-control" asp-items="@(new SelectList(Model.AvailablePackages, "Id", "Title", Model.PackageId))">
+                        <option value="">-- Choose a Package --</option>
+                    </select>
+                    <span asp-validation-for="PackageId" class="text-danger"></span>
+                </div>
 
-        <form asp-action="BookNow" method="post">
-            <div class="form-group mb-3">
-                <label asp-for="PackageId"></label>
-                <select asp-for="PackageId" class="form-control" asp-items="@(new SelectList(Model.AvailablePackages, "Id", "Title", Model.PackageId))">
-                    <option value="">-- Choose Package --</option>
-                </select>
-                <span asp-validation-for="PackageId" class="text-danger"></span>
-            </div>
+                <div class="form-group mb-3">
+                    <label asp-for="TravelDate">Travel Date</label>
+                    <input asp-for="TravelDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="TravelDate" class="text-danger"></span>
+                </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="TravelDate"></label>
-                <input asp-for="TravelDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                <span asp-validation-for="TravelDate" class="text-danger"></span>
-            </div>
+                <div class="form-group mb-3">
+                    <label asp-for="NumPeople">Number of People</label>
+                    <input asp-for="NumPeople" class="form-control" type="number" min="1" />
+                    <span asp-validation-for="NumPeople" class="text-danger"></span>
+                </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="NumPeople"></label>
-                <input asp-for="NumPeople" class="form-control" type="number" min="1" />
-                <span asp-validation-for="NumPeople" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn btn-book">Book Now</button>
-        </form>
+                <button type="submit" class="btn btn-book">Book Now</button>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-@{
-    await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

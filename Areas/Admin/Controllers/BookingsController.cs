@@ -9,7 +9,7 @@ using TourismManagement.Models.ViewModels;
 
 namespace TourismManagement.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    //[Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class BookingsController : Controller
     {

@@ -8,7 +8,7 @@ using TourismManagement.Models.ViewModels;
 
 namespace TourismManagement.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+    //[Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class PackagesController : Controller
     {
@@ -73,27 +73,26 @@ namespace TourismManagement.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Handle image upload
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
-                    // Create upload directory if it doesn't exist
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                     if (!Directory.Exists(uploadsFolder))
                         Directory.CreateDirectory(uploadsFolder);
 
-                    // Generate unique file name
                     var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
                     var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                    // Save image to disk
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await ImageFile.CopyToAsync(stream);
                     }
 
-                    // Save image path to the model (relative to wwwroot)
-                    package.ImagePath = "/uploads/" + uniqueFileName;
+                    // ✅ Save the relative path to ImagePaths
+                    package.ImagePaths.Add("/uploads/" + uniqueFileName);
                 }
+
+                // ✅ Set the ImagePathString so it's saved to the DB
+                package.ImagePathString = string.Join(",", package.ImagePaths);
 
                 _context.Add(package);
                 await _context.SaveChangesAsync();

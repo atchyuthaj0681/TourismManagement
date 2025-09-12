@@ -4,60 +4,290 @@
     ViewData["Title"] = "Create Package";
 }
 
-<h2>Create Package</h2>
+<style>
+    body {
+        background-color: #f4f7fa; /* Changed to a light gray background */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-<form asp-action="CreatePackage" method="post">
-    <div class="form-group">
-        <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+    .create-package-container {
+        display: grid;
+        grid-template-columns: 3fr 2fr; /* 60% for form, 40% for preview */
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 2rem auto;
+        background-color: #1c1f22;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); /* Softened shadow for light bg */
+    }
+
+    /* Form Panel Styling */
+    .form-panel {
+        padding-right: 2rem;
+        border-right: 1px solid #333;
+    }
+
+        .form-panel h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #adb5bd;
+    }
+
+    .form-control {
+        background-color: #2a2d30;
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #444;
+        font-size: 1rem;
+        color: #e0e0e0;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #5D5FEF;
+            box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.25);
+            background-color: #333;
+            outline: none;
+        }
+
+    /* Custom File Input */
+    .custom-file-input-wrapper {
+        position: relative;
+    }
+
+    .custom-file-button {
+        background-color: #495057;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+
+        .custom-file-button:hover {
+            background-color: #5a6268;
+        }
+
+    #ImageFiles {
+        display: none;
+    }
+
+    #file-chosen {
+        margin-left: 10px;
+        font-style: italic;
+        color: #adb5bd;
+    }
+
+    /* Preview Panel Styling */
+    .preview-panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-header {
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .preview-card {
+        flex-grow: 1;
+        background: #2a2d30 url('https://images.unsplash.com/photo-1502602898657-3e91760c0341?q=80&w=2070') no-repeat center center;
+        background-size: cover;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        padding: 1.5rem;
+    }
+
+    .preview-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+    }
+
+    .preview-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+    }
+
+    #preview-title {
+        font-size: 2rem;
+        font-weight: 700;
+        min-height: 2.5rem; /* Prevent layout shift */
+    }
+
+    #preview-destination {
+        font-size: 1.2rem;
+        color: #adb5bd;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary {
+        background-color: #5D5FEF;
+        border-color: #5D5FEF;
+    }
+
+        .btn-primary:hover {
+            background-color: #4a4cc7;
+            border-color: #4a4cc7;
+        }
+
+    .btn-secondary {
+        background-color: #495057;
+        border-color: #495057;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+    /* Responsive adjustments */
+    @@media (max-width: 992px) {
+        .create-package-container {
+            grid-template-columns: 1fr;
+        }
+
+        .form-panel {
+            border-right: none;
+            padding-right: 0;
+        }
+    }
+</style>
+
+<div class="create-package-container">
+    <div class="form-panel">
+        <h2>@ViewData["Title"]</h2>
+
+        <form asp-action="CreatePackage" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Title"></label>
+                    <input asp-for="Title" class="form-control" id="titleInput" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Destination"></label>
+                    <input asp-for="Destination" class="form-control" id="destinationInput" />
+                    <span asp-validation-for="Destination" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="DurationDays"></label>
+                    <input asp-for="DurationDays" class="form-control" type="number" min="1" max="365" />
+                    <span asp-validation-for="DurationDays" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Price"></label>
+                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Itinerary"></label>
+                <textarea asp-for="Itinerary" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Itinerary" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="Status"></label>
+                    <select asp-for="Status" class="form-control">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label>Upload Images</label>
+                    <div class="custom-file-input-wrapper">
+                        <input type="file" name="ImageFiles" id="ImageFiles" multiple class="form-control" />
+                        <label for="ImageFiles" class="custom-file-button">Choose Files</label>
+                        <span id="file-chosen">No file chosen</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Create Package</button>
+                <a asp-action="Packages" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Destination"></label>
-        <input asp-for="Destination" class="form-control" />
-        <span asp-validation-for="Destination" class="text-danger"></span>
+    <div class="preview-panel">
+        <div class="preview-header">Live Preview</div>
+        <div class="preview-card">
+            <div class="preview-overlay"></div>
+            <div class="preview-content">
+                <h3 id="preview-title">Package Title</h3>
+                <p id="preview-destination">Destination</p>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="DurationDays"></label>
-        <input asp-for="DurationDays" class="form-control" type="number" min="1" max="365" />
-        <span asp-validation-for="DurationDays" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Itinerary"></label>
-        <textarea asp-for="Itinerary" class="form-control"></textarea>
-        <span asp-validation-for="Itinerary" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Status"></label>
-        <select asp-for="Status" class="form-control">
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-        </select>
-        <span asp-validation-for="Status" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Packages" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Live preview for Title
+            $('#titleInput').on('keyup', function () {
+                var title = $(this).val();
+                $('#preview-title').text(title || 'Package Title');
+            });
+
+            // Live preview for Destination
+            $('#destinationInput').on('keyup', function () {
+                var destination = $(this).val();
+                $('#preview-destination').text(destination || 'Destination');
+            });
+
+            // Custom file input label
+            const actualBtn = document.getElementById('ImageFiles');
+            const fileChosen = document.getElementById('file-chosen');
+            actualBtn.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    fileChosen.textContent = this.files.length + ' file(s) selected';
+                } else {
+                    fileChosen.textContent = 'No file chosen';
+                }
+            });
+        });
+    </script>
 }

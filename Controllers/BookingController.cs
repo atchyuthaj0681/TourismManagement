@@ -79,7 +79,7 @@ namespace TourismManagement.Controllers
             return View();
         }
 
-        // Booking history for customers
+        // Display list of bookings with refund info
         [Authorize]
         public async Task<IActionResult> BookingHistory()
         {
@@ -92,61 +92,51 @@ namespace TourismManagement.Controllers
                 .OrderByDescending(b => b.BookingDate)
                 .ToListAsync();
 
-            var model = new BookingListViewModel
+            // Calculate refund for each
+            foreach (var b in bookings)
             {
-                Bookings = bookings
-            };
+                b.RefundAmount = b.Status == "Cancelled" ? b.RefundAmount : Math.Round(b.TotalAmount * 0.85m, 2);
+            }
 
+            var model = new BookingListViewModel { Bookings = bookings };
             return View(model);
         }
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> CancelBooking(int id)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
             var booking = await _context.Bookings
                 .Include(b => b.Package)
-                .Include(b => b.User) // Optional: if you want to verify ownership
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == user.Id);
 
             if (booking == null)
-            {
-                TempData["Error"] = "Booking not found.";
-                return RedirectToAction("BookingHistory");
-            }
+                return NotFound();
 
-            // Optional: Ensure user can only cancel their own booking
-            var userEmail = User.Identity?.Name;
-            if (booking.User.Email != userEmail)
-            {
-                TempData["Error"] = "Unauthorized action.";
-                return RedirectToAction("BookingHistory");
-            }
-
-            // Check if already cancelled
             if (booking.Status == "Cancelled")
             {
-                TempData["Info"] = "This booking has already been cancelled.";
+                TempData["Error"] = "This booking has already been cancelled.";
                 return RedirectToAction("BookingHistory");
             }
 
-            // Check travel date
             if (booking.TravelDate <= DateTime.Now)
             {
-                TempData["Error"] = "You cannot cancel past or ongoing bookings.";
+                TempData["Error"] = "Cannot cancel a past or ongoing trip.";
                 return RedirectToAction("BookingHistory");
             }
 
-            // Proceed to cancel
+            // Perform cancellation and calculate refund
             booking.Status = "Cancelled";
             booking.CancellationDate = DateTime.Now;
-
-            // Apply 15% cancellation fee
             booking.RefundAmount = Math.Round(booking.TotalAmount * 0.85m, 2);
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Booking for {booking.Package.Title} on {booking.TravelDate:MMM dd, yyyy} has been cancelled. Refund: {booking.RefundAmount:C}";
+            TempData["Success"] = $"Booking cancelled successfully. Refund amount: {booking.RefundAmount:C}";
 
             return RedirectToAction("BookingHistory");
         }
@@ -175,23 +165,28 @@ namespace TourismManagement.Controllers
         }
 
 
-        // GET: Booking/EditBooking/5
         [Authorize]
+        [HttpGet]
         public async Task<IActionResult> EditBooking(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
-
             var booking = await _context.Bookings
                 .Include(b => b.Package)
-                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == user.Id);
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
             if (booking == null)
                 return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Restrict non-admin users from editing others' bookings
+            if (!User.IsInRole("Admin") && booking.UserId != currentUser.Id)
+                return Forbid();
+
             if (booking.Status == "Cancelled" || booking.TravelDate <= DateTime.Now)
             {
                 TempData["Error"] = "You cannot edit a cancelled or past booking.";
-                return RedirectToAction("BookingHistory");
+                return User.IsInRole("Admin") ? RedirectToAction("ManageBookings") : RedirectToAction("BookingHistory");
             }
 
             var model = new EditBookingViewModel
@@ -205,41 +200,43 @@ namespace TourismManagement.Controllers
             return View(model);
         }
 
-        // POST: Booking/EditBooking
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> EditBooking(EditBookingViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _userManager.GetUserAsync(User);
-
             var booking = await _context.Bookings
                 .Include(b => b.Package)
-                .FirstOrDefaultAsync(b => b.Id == model.Id && b.UserId == user.Id);
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(b => b.Id == model.Id);
 
             if (booking == null)
                 return NotFound();
 
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Restrict edit if not admin and not the owner
+            if (!User.IsInRole("Admin") && booking.UserId != currentUser.Id)
+                return Forbid();
+
             if (booking.Status == "Cancelled" || booking.TravelDate <= DateTime.Now)
             {
                 TempData["Error"] = "You cannot edit a cancelled or past booking.";
-                return RedirectToAction("BookingHistory");
+                return User.IsInRole("Admin") ? RedirectToAction("ManageBookings") : RedirectToAction("BookingHistory");
             }
 
-            // Update allowed fields
+            // Update values
             booking.TravelDate = model.TravelDate;
             booking.NumPeople = model.NumPeople;
-
-            // Recalculate total amount
             booking.TotalAmount = booking.Package.Price * model.NumPeople;
 
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Booking updated successfully.";
-            return RedirectToAction("BookingHistory");
+            return User.IsInRole("Admin") ? RedirectToAction("ManageBookings") : RedirectToAction("BookingHistory");
         }
 
 

@@ -4,44 +4,161 @@
     ViewData["Title"] = "Packages";
 }
 
-<h2>Packages</h2>
+<style>
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto 2rem auto;
+    }
 
-<p>
+    #packageSearchInput {
+        border-radius: 50px;
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .package-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        cursor: pointer; /* Indicates the whole card is clickable */
+        border: 1px solid #e0e0e0;
+        position: relative;
+        min-height: 350px;
+    }
+
+        .package-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+    .package-card-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 0.5s ease;
+        z-index: 1;
+    }
+
+    .package-card:hover .package-card-bg {
+        transform: scale(1.05);
+    }
+
+    .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* Stronger gradient for better text readability */
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
+        z-index: 2;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        color: white;
+    }
+
+    .card-title {
+        font-weight: 700;
+        font-size: 1.5rem; /* Larger font size */
+        color: #fff;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Added shadow for depth */
+    }
+
+    .card-price {
+        font-size: 1.2rem; /* Adjusted font size */
+        font-weight: bold;
+        color: #ffc107;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Added shadow for depth */
+    }
+
+    .btn-blurred {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        padding: 8px 16px;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+        .btn-blurred:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+</style>
+
+<div class="text-center my-5">
+    <h2 class="display-4 fw-bold">Packages</h2>
+
     @if (User.IsInRole("Admin"))
     {
-        <a asp-action="CreatePackage" class="btn btn-primary">Create New Package</a>
+        <a asp-action="CreatePackage" class="btn btn-primary mt-3">Create New Package</a>
     }
-</p>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Destination</th>
-            <th>Duration (Days)</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var package in Model)
-        {
-            <tr>
-                <td>@package.Title</td>
-                <td>@package.Destination</td>
-                <td>@package.DurationDays</td>
-                <td>@package.Price.ToString("C")</td>
-                <td>@package.Status</td>
-                <td>
-                    <a asp-action="PackageDetails" asp-route-id="@package.Id" class="btn btn-info btn-sm">Details</a>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-action="EditPackage" asp-route-id="@package.Id" class="btn btn-warning btn-sm">Edit</a>
-                        <a asp-action="DeletePackage" asp-route-id="@package.Id" class="btn btn-danger btn-sm">Delete</a>
+<div class="search-container">
+    <input type="text" id="packageSearchInput" class="form-control" placeholder="Search for packages by title...">
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4" id="package-list">
+    @foreach (var package in Model)
+    {
+        <div class="col package-item">
+            <div class="card h-100 package-card" data-url="@Url.Action("PackageDetails", "Home", new { id = package.Id })">
+                <div class="package-card-bg" style="background-image: url('@(package.ImagePaths?.Any() == true ? Url.Content(package.ImagePaths.First()) : Url.Content("~/images/no-image-available.png"))');"></div>
+
+                <div class="card-overlay">
+                    <h5 class="card-title">@package.Title</h5>
+                    <p class="card-price">@package.Price.ToString("C")</p>
+                    <div class="mt-auto">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="EditPackage" asp-route-id="@package.Id" class="btn btn-blurred btn-sm me-2 no-redirect">Edit</a>
+                            <a asp-action="DeletePackage" asp-route-id="@package.Id" class="btn btn-blurred btn-sm no-redirect">Delete</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Search functionality
+            $("#packageSearchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#package-list .package-item").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Clickable cards functionality
+            $('.package-card').on('click', function(e) {
+                if ($(e.target).closest('.no-redirect').length === 0) {
+                    var url = $(this).data('url');
+                    if (url) {
+                        window.location.href = url;
                     }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                }
+            });
+        });
+    </script>
+}

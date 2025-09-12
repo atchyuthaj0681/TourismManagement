@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TourismManagement.Models
 {
@@ -32,11 +33,26 @@ namespace TourismManagement.Models
         [Required]
         [StringLength(10)]
         public string Status { get; set; } // "Active" or "Inactive"
-        [Display(Name = "Package Image")]
-        public string? ImagePath { get; set; } // Store image URL or path
 
+        // 🧠 Support for multiple images
+        [NotMapped]
+        public List<string> ImagePaths { get; set; } = new List<string>();
+
+        // 👇 This is stored in DB
+        public string? ImagePathString
+        {
+            get => string.Join(",", ImagePaths);
+            set => ImagePaths = value?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>();
+        }
+
+        // ❗ Optional: Keep this if used in old views/controllers
+        [Display(Name = "Package Image")]
+        public string? ImagePath { get; set; }
 
         // Navigation property
         public List<Booking> Bookings { get; set; } = new List<Booking>();
+
+        public List<PackageImage> Images { get; set; } = new List<PackageImage>();
+
     }
 }

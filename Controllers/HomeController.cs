@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,49 @@ namespace TourismManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var packages = _context.Packages.ToList(); // This works because ApplicationDbContext has DbSet<Package>
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+            // Get the IDs of the top 3 most booked packages
+            var trendingPackageIds = await _context.Bookings
+                .Where(b => b.PackageId != null)
+                .GroupBy(b => b.PackageId)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .Take(3)
+                .ToListAsync();
+
+            // Get the packages that match those IDs
+            var packages = await _context.Packages
+                .Where(p => trendingPackageIds.Contains(p.Id) && p.Status == "Active")
+                .ToListAsync();
+
+            // If there are fewer than 3 trending packages, get some of the latest active packages to fill the gap
+            if (packages.Count < 3)
+            {
+                var additionalPackages = await _context.Packages
+                    .Where(p => p.Status == "Active" && !trendingPackageIds.Contains(p.Id))
+                    .OrderByDescending(p => p.Id)
+                    .Take(3 - packages.Count)
+                    .ToListAsync();
+
+                packages.AddRange(additionalPackages);
+            }
+
+            // Ensure unique packages and take a reasonable number for display on the home page
+            packages = packages.DistinctBy(p => p.Id).Take(5).ToList(); // Limit to 5 for the scrollable list
 
             var viewModel = new PackageListViewModel
             {
@@ -32,7 +66,6 @@ namespace TourismManagement.Controllers
             return View(viewModel);
         }
 
-        // List all packages - accessible to everyone
         [AllowAnonymous]
         public async Task<IActionResult> Packages()
         {
@@ -40,7 +73,6 @@ namespace TourismManagement.Controllers
             return View(packages);
         }
 
-        // View package details by Id
         [AllowAnonymous]
         public async Task<IActionResult> PackageDetails(int? id)
         {
@@ -48,14 +80,12 @@ namespace TourismManagement.Controllers
                 return NotFound();
 
             var package = await _context.Packages.FirstOrDefaultAsync(p => p.Id == id);
-
             if (package == null)
                 return NotFound();
 
             return View(package);
         }
 
-        // Admin-only: Create package
         [Authorize(Roles = "Admin")]
         public IActionResult CreatePackage()
         {
@@ -65,10 +95,37 @@ namespace TourismManagement.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreatePackage(Package package)
+        public async Task<IActionResult> CreatePackage(Package package, List<IFormFile> ImageFiles)
         {
             if (ModelState.IsValid)
             {
+                List<string> savedImagePaths = new List<string>();
+
+                if (ImageFiles != null && ImageFiles.Count > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    foreach (var image in ImageFiles)
+                    {
+                        if (image.Length > 0)
+                        {
+                            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+
+                            savedImagePaths.Add("/uploads/" + uniqueFileName);
+                        }
+                    }
+                }
+
+                package.ImagePathString = string.Join(",", savedImagePaths);
                 _context.Packages.Add(package);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Packages));
@@ -76,48 +133,72 @@ namespace TourismManagement.Controllers
             return View(package);
         }
 
-        // Admin-only: Edit package
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditPackage(int? id)
+        public async Task<IActionResult> EditPackage(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var package = await _context.Packages.FindAsync(id);
-            if (package == null)
-                return NotFound();
+            if (package == null) return NotFound();
 
             return View(package);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditPackage(int id, Package package)
+        public async Task<IActionResult> EditPackage(int id, [Bind("Id,Title,Destination,DurationDays,Price,Description,Itinerary,Status,ImagePathString")] Package model, List<IFormFile> ImageFiles)
         {
-            if (id != package.Id)
-                return NotFound();
+            if (id != model.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var package = await _context.Packages.AsNoTracking().FirstOrDefaultAsync(p => p.Id == model.Id);
+            if (package == null) return NotFound();
+
+            package.Title = model.Title;
+            package.Destination = model.Destination;
+            package.DurationDays = model.DurationDays;
+            package.Price = model.Price;
+            package.Description = model.Description;
+            package.Itinerary = model.Itinerary;
+            package.Status = model.Status;
+
+            List<string> updatedImagePaths = new List<string>();
+            if (!string.IsNullOrEmpty(model.ImagePathString))
             {
-                try
-                {
-                    _context.Update(package);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Packages.Any(e => e.Id == id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Packages));
+                updatedImagePaths.AddRange(model.ImagePathString.Split(',', StringSplitOptions.RemoveEmptyEntries));
             }
-            return View(package);
+
+            if (ImageFiles != null && ImageFiles.Count > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                foreach (var imageFile in ImageFiles)
+                {
+                    if (imageFile.Length > 0)
+                    {
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(stream);
+                        }
+                        updatedImagePaths.Add("/uploads/" + uniqueFileName);
+                    }
+                }
+            }
+
+            package.ImagePathString = string.Join(",", updatedImagePaths);
+
+            _context.Update(package);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("PackageDetails", new { id = package.Id });
         }
 
-        // Admin-only: Delete package
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletePackage(int? id)
         {
@@ -145,7 +226,6 @@ namespace TourismManagement.Controllers
             return RedirectToAction(nameof(Packages));
         }
 
-        // Static Pages
         public IActionResult About()
         {
             return View();

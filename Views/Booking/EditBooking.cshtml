@@ -4,41 +4,180 @@
     ViewData["Title"] = "Edit Booking";
 }
 
-<h2>Edit Booking</h2>
+<style>
+    /* Clean background for the page */
+    body {
+        background-color: #f8f9fa; /* Light gray background */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+    .edit-booking-container {
+        min-height: 90vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
 
-<form asp-action="EditBooking" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
+    /* Modern, Opaque Form Card */
+    .edit-booking-card {
+        background-color: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 550px;
+        overflow: hidden; /* Important for the header's rounded corners */
+    }
 
-    <div class="mb-3">
-        <label asp-for="TravelDate" class="form-label"></label>
-        <input asp-for="TravelDate" class="form-control" type="date" />
-        <span asp-validation-for="TravelDate" class="text-danger"></span>
+    /* Colored Card Header */
+    .card-header-custom {
+        background-image: linear-gradient(45deg, #5D5FEF 0%, #8B5CE0 100%);
+        padding: 2rem;
+        text-align: center;
+    }
+
+        .card-header-custom h2 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+    /* Card Body for the Form */
+    .card-body-custom {
+        padding: 2.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #343a40;
+    }
+
+    /* Modern Form Inputs */
+    .form-control {
+        background-color: #f1f3f5;
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #dee2e6;
+        font-size: 1rem;
+        color: #495057;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: #5D5FEF;
+            box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.25);
+            background-color: #fff;
+            outline: none;
+        }
+
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+    /* Action Buttons Container */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-update {
+        flex-grow: 1;
+        padding: 14px;
+        background-image: linear-gradient(45deg, #5D5FEF 0%, #8B5CE0 100%);
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(93, 95, 239, 0.3);
+    }
+
+        .btn-update:hover, .btn-update:focus {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(93, 95, 239, 0.4);
+            outline: none;
+        }
+
+    .btn-cancel {
+        flex-grow: 1;
+        padding: 14px;
+        background-color: #e9ecef;
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+        .btn-cancel:hover {
+            background-color: #dee2e6;
+            border-color: #ced4da;
+        }
+
+    .text-danger {
+        font-size: 0.9rem;
+        margin-top: 5px;
+        display: block;
+        font-weight: 500;
+    }
+</style>
+
+<div class="edit-booking-container">
+    <div class="edit-booking-card">
+        <div class="card-header-custom">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+        <div class="card-body-custom">
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <form asp-action="EditBooking" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="TravelDate"></label>
+                    <input asp-for="TravelDate" class="form-control" type="date"
+                           min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="TravelDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="NumPeople">Number of People</label>
+                    <input asp-for="NumPeople" class="form-control" type="number" min="1" />
+                    <span asp-validation-for="NumPeople" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Total Amount</label>
+                    <input class="form-control" value="@Model.TotalAmount.ToString("C")" readonly />
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-update">Update Booking</button>
+                    <a asp-action="BookingHistory" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="NumPeople" class="form-label"></label>
-        <input asp-for="NumPeople" class="form-control" type="number" min="1" />
-        <span asp-validation-for="NumPeople" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label>Total Amount</label>
-        <input class="form-control" value="@Model.TotalAmount.ToString("C")" readonly />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Update Booking</button>
-    <a asp-action="BookingHistory" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
-@{
+    @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    
 }

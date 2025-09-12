@@ -13,6 +13,8 @@ namespace TourismManagement.Data
 
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Package> Packages { get; set; }
+        public DbSet<PackageImage> PackageImages { get; set; }
+
         public DbSet<Issue> Issues { get; set; }
         public DbSet<Inquiry> Inquiries { get; set; }
 

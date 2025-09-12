@@ -20,64 +20,50 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <!-- Left-side navigation -->
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Packages">Packages</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookNow">Book Now</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookingHistory">My Bookings</a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        @if (!User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-        </li>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Packages">Packages</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookNow">Book Now</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Booking" asp-action="BookingHistory">My Bookings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About Us</a>
+                            </li>
+                            
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                           
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Packages">Packages</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Booking" asp-action="ManageBookings">Manage Bookings</a>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About Us</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Contact">Contact</a>
-                        </li>
                     </ul>
-
-                    <!-- Right-side: search + login -->
-                    <form class="d-flex me-3" asp-controller="Search" asp-action="Index" method="get" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="query" />
-                        <button class="btn btn-outline-primary" type="submit">Search</button>
-                    </form>
-
-                    <partial name="_LoginPartial" />
+                    <div class="ms-auto">
+                        <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    @* Optional Footer *@
-    @* 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - TourismManagement - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    *@
-
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -4,85 +4,236 @@
     ViewData["Title"] = "My Booking History";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    body {
+        background-color: #f4f7fa; /* Light background for the whole page */
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
+    .booking-history-container {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+    }
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Package</th>
-            <th>Travel Date</th>
-            <th>Booking Date</th>
-            <th>Number of People</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var booking in Model.Bookings)
-        {
-            <tr>
-                <td>@booking.Package.Title</td>
-                <td>@booking.TravelDate.ToString("yyyy-MM-dd")</td>
-                <td>@booking.BookingDate.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@booking.NumPeople</td>
-                <td>@booking.TotalAmount.ToString("C")</td>
-                <td>
-                    @if (booking.Status == "Cancelled")
-                    {
-                        <span class="text-danger">Cancelled</span>
-                    }
-                    else
-                    {
-                        <span class="text-success">Booked</span>
-                    }
-                </td>
-                <td>
-                    @if (booking.Status != "Cancelled" && booking.TravelDate > DateTime.Now)
-                    {
-                        <button class="btn btn-danger btn-sm"
-                                data-toggle="modal"
-                                data-target="#cancelModal"
-                                data-bookingid="@booking.Id"
-                                data-packagetitle="@booking.Package.Title"
-                                data-traveldate="@booking.TravelDate.ToString("yyyy-MM-dd")">
-                            Cancel
-                        </button>
-                    }
-                </td>
-            </tr>
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1a253c;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    /* --- NEW CSS FOR SEARCH BAR --- */
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto 2.5rem auto; /* Center the search bar */
+    }
+
+    #bookingSearchInput {
+        border-radius: 50px;
+        padding: 12px 20px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        font-size: 1rem;
+    }
+    /* ------------------------------ */
+
+    /* List Header */
+    .booking-list-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 0.5fr 1fr 0.8fr 1.5fr; /* Column layout */
+        padding: 0 1.5rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Individual Booking Item */
+    .booking-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 0.5fr 1fr 0.8fr 1.5fr; /* Same layout as header */
+        align-items: center;
+        background-color: #fff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+        .booking-item:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            transform: translateY(-3px);
         }
-    </tbody>
-</table>
 
-<!-- Cancel Confirmation Modal -->
-<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <form asp-action="CancelBooking" method="post" id="cancelForm">
+    .booking-detail {
+        font-size: 1rem;
+        color: #495057;
+    }
+
+        .booking-detail.package-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #212529;
+        }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-booked {
+        background-color: #e7f5ec;
+        color: #28a745;
+    }
+
+    .status-cancelled {
+        background-color: #fbe9e9;
+        color: #dc3545;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        padding: 6px 12px;
+        font-size: 0.875rem;
+        border-radius: 6px;
+        margin-right: 5px;
+        transition: all 0.2s ease;
+    }
+
+    /* Responsive Design for Mobile */
+    @@media (max-width: 992px) {
+        .booking-list-header {
+            display: none; /* Hide header on mobile */
+        }
+
+        .booking-item {
+            grid-template-columns: 1fr; /* Stack everything vertically */
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .booking-detail::before {
+            content: attr(data-label); /* Show labels */
+            font-weight: 600;
+            color: #6c757d;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .booking-actions {
+            text-align: left !important;
+        }
+    }
+</style>
+
+<div class="container booking-history-container">
+    <h2 class="page-title">@ViewData["Title"]</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="search-container">
+        <input type="text" id="bookingSearchInput" class="form-control" placeholder="Search by package, date, status, etc...">
+    </div>
+    @if (!Model.Bookings.Any())
+    {
+        <div class="text-center py-5">
+            <p class="lead">You have no booking history yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="booking-list-header">
+            <div>Package</div>
+            <div>Travel Date</div>
+            <div>Booking Date</div>
+            <div>People</div>
+            <div>Total</div>
+            <div>Status</div>
+            <div class="text-center">Actions</div>
+        </div>
+
+        <div class="booking-list">
+            @foreach (var booking in Model.Bookings)
+            {
+                var isFutureBooking = booking.TravelDate > DateTime.Now;
+                var refund = Math.Round(booking.TotalAmount * 0.85m, 2);
+
+                <div class="booking-item">
+                    <div class="booking-detail package-title" data-label="Package">@booking.Package.Title</div>
+                    <div class="booking-detail" data-label="Travel Date">@booking.TravelDate.ToString("yyyy-MM-dd")</div>
+                    <div class="booking-detail" data-label="Booking Date">@booking.BookingDate.ToString("yyyy-MM-dd HH:mm")</div>
+                    <div class="booking-detail" data-label="People">@booking.NumPeople</div>
+                    <div class="booking-detail" data-label="Total">@booking.TotalAmount.ToString("C")</div>
+                    <div class="booking-detail" data-label="Status">
+                        @if (booking.Status == "Cancelled")
+                        {
+                            <span class="status-badge status-cancelled">Cancelled</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-booked">Booked</span>
+                        }
+                    </div>
+                    <div class="booking-detail booking-actions text-center" data-label="Actions">
+                        <a asp-action="BookingDetails" asp-route-id="@booking.Id" class="btn btn-sm btn-outline-primary action-btn">View</a>
+
+                        @if (booking.Status != "Cancelled" && isFutureBooking)
+                        {
+                            <a asp-action="EditBooking" asp-route-id="@booking.Id" class="btn btn-sm btn-outline-secondary action-btn">Edit</a>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger action-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#cancelModal"
+                                    data-bookingid="@booking.Id"
+                                    data-packagetitle="@booking.Package.Title"
+                                    data-traveldate="@booking.TravelDate.ToString("yyyy-MM-dd")"
+                                    data-refund="@refund.ToString("C")">
+                                Cancel
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form asp-action="CancelBooking" method="post">
             <input type="hidden" name="id" id="bookingId" />
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="cancelModalLabel">Cancel Booking</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
-                    <p>Are you sure you want to cancel the booking for:</p>
+                    <p>Are you sure you want to cancel your booking for:</p>
                     <p><strong id="packageTitle"></strong> on <strong id="travelDate"></strong>?</p>
-                    <p><small>A 15% cancellation penalty will apply.</small></p>
+                    <p class="text-warning">A 15% deduction will apply. You will be refunded: <strong id="refundAmount"></strong></p>
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Keep Booking</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep Booking</button>
                     <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
                 </div>
             </div>
@@ -91,17 +242,31 @@
 </div>
 
 @section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script>
-        $('#cancelModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
-            var bookingId = button.data('bookingid');
-            var packageTitle = button.data('packagetitle');
-            var travelDate = button.data('traveldate');
+        // Modal population script
+        var cancelModal = document.getElementById('cancelModal');
+        cancelModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var bookingId = button.getAttribute('data-bookingid');
+            var packageTitle = button.getAttribute('data-packagetitle');
+            var travelDate = button.getAttribute('data-traveldate');
+            var refund = button.getAttribute('data-refund');
 
-            var modal = $(this);
-            modal.find('#bookingId').val(bookingId);
-            modal.find('#packageTitle').text(packageTitle);
-            modal.find('#travelDate').text(travelDate);
+            cancelModal.querySelector('#bookingId').value = bookingId;
+            cancelModal.querySelector('#packageTitle').textContent = packageTitle;
+            cancelModal.querySelector('#travelDate').textContent = travelDate;
+            cancelModal.querySelector('#refundAmount').textContent = refund;
+        });
+
+        // --- NEW JQUERY SCRIPT FOR SEARCH FUNCTIONALITY ---
+        $(document).ready(function(){
+            $("#bookingSearchInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".booking-list .booking-item").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
         });
     </script>
 }
