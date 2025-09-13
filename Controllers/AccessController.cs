@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace TourismManagement.Areas.Admin.Controllers
+namespace TourismManagement.Controllers
 {
-    [Area("Admin")]
+    // The [Area("Admin")] attribute is removed because you're moving this to a normal controller path
     public class AccessController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -43,7 +43,8 @@ namespace TourismManagement.Areas.Admin.Controllers
                     }
                 }
 
-                return RedirectToAction("Index", "Packages", new { area = "Admin" });
+                // Corrected redirect: send the user to the Dashboard
+                return RedirectToAction("Index", "Dashboard");
             }
 
             ViewBag.ErrorMessage = "Incorrect admin code.";

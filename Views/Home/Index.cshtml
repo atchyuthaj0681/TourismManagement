@@ -361,12 +361,15 @@
             const scrollSpeed = 2000;
             let currentPackageIndex = 0;
             let autoScrollInterval;
+            const cardWidth = initialCards.outerWidth(true);
 
+            // Clone packages for seamless looping
             const packagesContent = $carouselGallery.html();
             $carouselGallery.append(packagesContent);
 
             let $cards = $('.package-card');
 
+            // Function to update the main content based on a card
             function updateMainContent(card) {
                 const $card = $(card);
                 const image = $card.data('image');
@@ -383,59 +386,64 @@
                 $(`.package-card[data-id='${id}']`).addClass('active');
             }
 
+            // The main auto-scroll function
             function scrollToNextPackage() {
                 currentPackageIndex++;
-                const scrollPosition = $cards[currentPackageIndex].offsetLeft;
+
+                // If we reach the end of the first set, reset the scroll position instantly
+                if (currentPackageIndex >= totalPackages) {
+                    currentPackageIndex = 0;
+                    $carouselGallery.scrollLeft(0);
+                }
+
+                const scrollPosition = $cards.eq(currentPackageIndex).position().left + $carouselGallery.scrollLeft();
 
                 $carouselGallery.animate({
                     scrollLeft: scrollPosition
                 }, 600, 'swing', function () {
-                    if (currentPackageIndex >= totalPackages) {
-                        currentPackageIndex = 0;
-                        $carouselGallery.scrollLeft(0);
-                    }
+                    // Update content after the scroll animation is complete
                     updateMainContent($cards.eq(currentPackageIndex));
                 });
             }
 
+            // Start the auto-scroll loop
             function startAutoScroll() {
                 stopAutoScroll();
                 autoScrollInterval = setInterval(scrollToNextPackage, scrollSpeed);
             }
 
+            // Stop the auto-scroll loop
             function stopAutoScroll() {
                 clearInterval(autoScrollInterval);
             }
 
+            // Initial setup
             updateMainContent($cards.eq(0));
             startAutoScroll();
 
+            // Event handlers for user interaction
             $carouselGallery.on('mouseenter', stopAutoScroll).on('mouseleave', startAutoScroll);
 
             $cards.on('click', function () {
                 stopAutoScroll();
                 const clickedCard = $(this);
-                currentPackageIndex = clickedCard.index() % totalPackages;
+                const originalIndex = clickedCard.index() % totalPackages;
 
-                const scrollPosition = $cards[currentPackageIndex].offsetLeft;
+                currentPackageIndex = originalIndex;
+                const scrollPosition = $cards.eq(originalIndex).position().left + $carouselGallery.scrollLeft();
 
                 $carouselGallery.animate({
                     scrollLeft: scrollPosition
-                }, 500, 'swing');
+                }, 600, 'swing');
 
                 updateMainContent(clickedCard);
             });
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.3 });
-
-            document.querySelectorAll('.slide-in-up, .fade-in').forEach(element => {
-                observer.observe(element);
+            // Update content on manual scroll
+            $carouselGallery.on('scroll', function() {
+                const scrollLeft = $carouselGallery.scrollLeft();
+                const cardIndex = Math.round(scrollLeft / cardWidth) % totalPackages;
+                updateMainContent($cards.eq(cardIndex));
             });
         });
     </script>
