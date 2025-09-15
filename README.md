@@ -25,9 +25,15 @@ User Booking History: A personalized and responsive list for users to view their
 **ADMIN ACCESS CODE : Atchyuth@j110
 (Enter the Admin Access Code in User accounts Dropdown to switch user to Admin)**
 
+<img width="1916" height="911" alt="image" src="https://github.com/user-attachments/assets/6021e3f9-3f27-4a07-901e-c030c2026dce" />
+
 
 --> Admin Panel Features
 Comprehensive Dashboard: A central "Manage Bookings" page for admins to view, filter, and sort all bookings on the platform.
+
+<img width="1917" height="910" alt="image" src="https://github.com/user-attachments/assets/dcd21e7d-5d4d-42dc-9783-5017dec6b6d1" />
+<img width="1897" height="857" alt="image" src="https://github.com/user-attachments/assets/043ad573-b0a5-4f68-b437-4b64369e9cf5" />
+
 
 Full CRUD for Packages:
 
